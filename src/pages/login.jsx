@@ -63,6 +63,7 @@ export const LogIn = () => {
 
                     <button
                         type="submit"
+                        onClick={() => navigate('/home')}
                         className="w-full bg-green-600 h-12 text-white py-3 flex items-center justify-center rounded-lg font-medium hover:bg-green-800 transition duration-300"
                     >
                         CONTINUE
