@@ -50,11 +50,11 @@ export const Carousel = () => {
                         <div className="rounded-lg d-flex align-items-center bg-lightGreen">
                             <img
                                 src={slide.img}
-                                className="rounded w-48 object-cover h-24 "
+                                className="rounded w-48 object-cover h-24 ml-4 md:ml-0 "
                                 alt={`Slide ${slide.id}`}
                             />
                             <div className="flex justify-center items-center w-full h-full">
-                                <p className=" m-4 font-normal font-title  text-xl W-3/4 text-center font-semibold">
+                                <p className=" m-4 font-normal font-title  text-xs md:text-xl W-3/4 text-center font-semibold">
                                     {slide.text}
                                 </p>
                             </div>

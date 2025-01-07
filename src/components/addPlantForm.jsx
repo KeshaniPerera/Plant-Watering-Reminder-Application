@@ -1,166 +1,178 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useFormik } from 'formik';
+import { PlantvalidationSchema } from '../formValidation.jsx';
+import { ToastContainer, toast } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
 
-export const AddPlant = ({ isPopupOpen, onClose, onAddPlant, plantList, setPlantList }) => {
-    const [formData, setFormData] = useState({
-        name: '',
-        description: '',
-        plantType: '',
-        image: null,
-        wateringFrequency: '',
-    });
+export const AddPlant = ({ isPopupOpen, onClose, onAddPlant }) => {
+  
+  const formik = useFormik({
+    initialValues: {
+      plantName: '',
+      plantDescription: '',
+      plantType: '',
+      plantImage: null,
+      plantFrequency: '', 
+    },
+    PlantvalidationSchema,
+    validateOnBlur: false,
+    onSubmit: (values) => {
+      const newPlant = {
+        id: new Date().getTime(), 
+        name: values.plantName,
+        description: values.plantDescription,
+        plantType: values.plantType,
+        image: values.plantImage
+          ? URL.createObjectURL(values.plantImage)
+          : 'https://via.placeholder.com/150?text=Plant+Image',
+        frequency: values.plantFrequency,
+      };
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
-    };
+      onAddPlant(newPlant); 
+      toast.success('New Plant Added!');
 
-    const handleFileChange = (e) => {
-        setFormData({ ...formData, image: e.target.files[0] });
-    };
+      setTimeout(() => {
+        onClose(); 
+        formik.resetForm(); 
+      }, 2000);
+    },
+  });
 
-    const handleAddPlant = () => {
-        // Create a new plant object with a new ID
-        const newPlant = {
-            id: plantList.length + 1,  // Assuming `id` is generated based on the list length
-            name: formData.name,
-            description: formData.description,
-            image: formData.image ? URL.createObjectURL(formData.image) : 'https://via.placeholder.com/150?text=Plant+Image',
-            frequency: formData.wateringFrequency,
-        };
+  const handleFileChange = (e) => {
+    formik.setFieldValue('plantImage', e.target.files[0]);
+  };
+  
+  const handleCancel = () => {
+    formik.resetForm();
+    onClose();
+  };
 
-        // Update the plant list
-        setPlantList([...plantList, newPlant]);
+  if (!isPopupOpen) return null;
 
-        // Call onAddPlant to pass data to parent (optional)
-        onAddPlant(newPlant);
-
-        // Reset form fields
-        setFormData({
-            name: '',
-            description: '',
-            plantType: '',
-            image: null,
-            wateringFrequency: '',
-        });
-
-        // Close the popup
-        onClose();
-    };
-
-    const handleCancel = () => {
-        setFormData({
-            name: '',
-            description: '',
-            plantType: '',
-            image: null,
-            wateringFrequency: '',
-        });
-        onClose();
-    };
-
-    if (!isPopupOpen) return null;
-
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 font-normal">
-            <div className="bg-white rounded-lg p-8 w-96 shadow-lg">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-lg font-bold text-green-800">Add a New Plant</h2>
-                    <button
-                        className="text-red-600 font-bold text-lg"
-                        onClick={onClose}
-                    >
-                        ✕
-                    </button>
-                </div>
-                <form className="flex flex-col gap-4">
-                    <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">
-                            Name
-                        </label>
-                        <input
-                            type="text"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleInputChange}
-                            className="w-full p-2 border rounded-md"
-                            placeholder="Enter plant name"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">
-                            Description
-                        </label>
-                        <textarea
-                            name="description"
-                            value={formData.description}
-                            onChange={handleInputChange}
-                            className="w-full p-2 border rounded-md"
-                            placeholder="Enter plant description"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">
-                            Plant Type
-                        </label>
-                        <input
-                            type="text"
-                            name="plantType"
-                            value={formData.plantType}
-                            onChange={handleInputChange}
-                            className="w-full p-2 border rounded-md"
-                            placeholder="Enter plant type"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">
-                            Image
-                        </label>
-                        <input
-                            type="file"
-                            onChange={handleFileChange}
-                            className="w-full p-2 border rounded-md"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">
-                            Watering Frequency
-                        </label>
-                        <select
-                            name="wateringFrequency"
-                            value={formData.wateringFrequency}
-                            onChange={handleInputChange}
-                            className="w-full p-2 border rounded-md"
-                        >
-                            <option value="" disabled>
-                                Select frequency
-                            </option>
-                            <option value="12h">12h</option>
-                            <option value="1 Day">1 Day</option>
-                            <option value="2 Days">2 Days</option>
-                            <option value="3 Days">3 Days</option>
-                            <option value="4 Days">4 Days</option>
-                            <option value="5 Days">5 Days</option>
-                            <option value="1 Week">1 Week</option>
-                        </select>
-                    </div>
-                    <div className="flex justify-between mt-4">
-                        <button
-                            type="button"
-                            className="px-4 py-2 bg-green-800 text-white rounded-md w-24"
-                            onClick={handleAddPlant}
-                        >
-                            Add
-                        </button>
-                        <button
-                            type="button"
-                            className="px-4 py-2 bg-red-600 text-white rounded-md w-24"
-                            onClick={handleCancel}
-                        >
-                            Cancel
-                        </button>
-                    </div>
-                </form>
-            </div>
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 font-normal">
+      <ToastContainer 
+        position="bottom-right"
+        autoClose={2000}
+        hideProgressBar={true}
+      />
+      <div className="bg-white rounded-lg p-8 w-96 shadow-lg">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-bold text-green-700">Add a New Plant</h2>
+          <button
+            className="text-red-600 font-bold text-lg"
+            onClick={handleCancel} 
+          >
+            ✕
+          </button>
         </div>
-    );
+        <form className="flex flex-col gap-4" onSubmit={formik.handleSubmit}>
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              Name
+            </label>
+            <input
+              type="text"
+              name="plantName"
+              value={formik.values.plantName}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              className="w-full p-2 border rounded-md"
+              placeholder="Enter plant name"
+            />
+            {formik.touched.plantName && formik.errors.plantName && (
+              <div className="text-red-600 text-sm">{formik.errors.plantName}</div>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              Description
+            </label>
+            <textarea
+              name="plantDescription"
+              value={formik.values.plantDescription}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              className="w-full p-2 border rounded-md"
+              placeholder="Enter plant description"
+            />
+            {formik.touched.plantDescription && formik.errors.plantDescription && (
+              <div className="text-red-600 text-sm">{formik.errors.plantDescription}</div>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              Type
+            </label>
+            <input
+              type="text"
+              name="plantType"
+              value={formik.values.plantType}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              className="w-full p-2 border rounded-md"
+              placeholder="Enter plant type"
+            />
+            {formik.touched.plantType && formik.errors.plantType && (
+              <div className="text-red-600 text-sm">{formik.errors.plantType}</div>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              Watering Frequency
+            </label>
+            <select
+              name="plantFrequency"
+              value={formik.values.plantFrequency}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              className="w-full p-2 border rounded-md"
+            >
+              <option value="">Select watering frequency</option>
+              <option value="12h">12h</option>
+              <option value="1 Day">1 Day</option>
+              <option value="2 Days">2 Days</option>
+              <option value="3 Days">3 Days</option>
+              <option value="5 Days">5 Days</option>
+              <option value="1 Week">1 Week</option>
+            </select>
+            {formik.touched.plantFrequency && formik.errors.plantFrequency && (
+              <div className="text-red-600 text-sm">{formik.errors.plantFrequency}</div>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              Upload Image
+            </label>
+            <input
+              type="file"
+              name="plantImage"
+              onChange={handleFileChange}
+              className="w-full p-2 border rounded-md"
+            />
+          </div>
+
+          <div className="flex justify-between mt-4">
+            <button
+              type="submit"
+              className="bg-green-600 text-white px-4 py-2 rounded-md"
+            >
+              Add Plant
+            </button>
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="bg-yellow-700 text-white px-4 py-2 rounded-md"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 };
